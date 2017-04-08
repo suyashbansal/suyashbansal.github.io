@@ -196,6 +196,7 @@ PLATFORMS
 DEPENDENCIES
   github-pages (= 134)
   jekyll-feed (~> 0.6)
+  jekyll-sitemap
   jemoji
   json
   minima (~> 2.0)

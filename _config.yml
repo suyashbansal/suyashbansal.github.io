@@ -24,6 +24,9 @@ url: "http://suyashbansal.github.io" # the base hostname & protocol for your sit
 twitter_username: suyashbansal
 github_username:  suyashbansal
 
+# Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking
+google_analytics: UA-72931801-2
+
 # Build settings
 markdown: kramdown
 theme: minima
