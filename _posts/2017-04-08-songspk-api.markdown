@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "Songs.PK API 🎶"
+title:  "Songs.PK API "
 date:   2017-04-08 15:36:00 +0530
 ---
-A few months back, I was thniking about making an application which could be a simpler, ad-free version of the original SongsPK website. But, like for any application, I needed data. Since there was no API available for the purpose, I started working on my own.
+A few months back, I was thinking about making an application which could be a simpler, ad-free version of the original SongsPK website. But, like for any application, I needed data. Since there was no API available for the purpose, I started working on my own.
 
 I used [PHP][php-home] for scripting and hosted the code on [Heroku][heroku]. I have an instance of the code running at [`https://songspk-suyash.herokuapp.com/`][heroku-project]. But please keep in mind that since I'm using the free version of Heroku, it might take some time to respond at first.
 
