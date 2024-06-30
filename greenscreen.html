@@ -5,11 +5,79 @@
     <title>Greenscreen</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media (orientation: landscape) {
+            .rotate-right {
+                transform: rotate(90deg);
+                transform-origin: top right;
+                position: fixed;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%) rotate(90deg);
+            }
+
+            .rotate-left {
+                transform: rotate(-90deg);
+                transform-origin: top left;
+                position: fixed;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%) rotate(-90deg);
+            }
+        }
+    </style>
 </head>
 
-<body>
+<body class="flex justify-center items-center min-h-screen">
+    <div id="myDiv" class="w-50 h-200 bg-blue-500 flex items-end justify-center">
+        <div class="inner-div w-200 h-50 bg-red-500"></div>
+        <div id="rotChange" class="text-lg font-bold">TEST</div>
+    </div>
+    <script>
+        let previousOrientation = window.orientation;
 
+        function updateDivOrientation() {
+            var myDiv = document.getElementById('myDiv');
+            var rotChange = document.getElementById('rotChange');
+            var currentOrientation = window.orientation;
+
+            if (window.matchMedia("(orientation: landscape)").matches) {
+                if (currentOrientation === 90) {
+                    myDiv.classList.add('rotate-right');
+                    myDiv.classList.remove('rotate-left');
+                } else if (currentOrientation === -90) {
+                    myDiv.classList.add('rotate-left');
+                    myDiv.classList.remove('rotate-right');
+                }
+            } else {
+                myDiv.classList.remove('rotate-left', 'rotate-right');
+            }
+
+            // Check the rotation direction
+            if (previousOrientation !== undefined && previousOrientation !== currentOrientation) {
+                if (previousOrientation === 0 && currentOrientation === 90) {
+                    rotChange.textContent = 'Rotated clockwise';
+                } else if (previousOrientation === 0 && currentOrientation === -90) {
+                    rotChange.textContent = 'Rotated counter-clockwise';
+                } else if (previousOrientation === 90 && currentOrientation === 0) {
+                    rotChange.textContent = 'Rotated counter-clockwise';
+                } else if (previousOrientation === -90 && currentOrientation === 0) {
+                    rotChange.textContent = 'Rotated clockwise';
+                } else if (previousOrientation === 90 && currentOrientation === -90) {
+                    rotChange.textContent = 'Rotated counter-clockwise';
+                } else if (previousOrientation === -90 && currentOrientation === 90) {
+                    rotChange.textContent = 'Rotated clockwise';
+                }
+            }
+
+            previousOrientation = currentOrientation;
+        }
+
+        window.addEventListener('resize', updateDivOrientation);
+        window.addEventListener('orientationchange', updateDivOrientation);
+        updateDivOrientation(); // Initial call
+    </script>
 </body>
 
 </html>
