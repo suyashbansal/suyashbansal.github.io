@@ -57,13 +57,13 @@
             // Check the rotation direction
             if (previousOrientation !== undefined && previousOrientation !== currentOrientation) {
                 if (previousOrientation === 0 && currentOrientation === 90) {
-                    rotChange.textContent = 'Rotated clockwise';
+                    rotChange.textContent = 'Rotated counter-clockwise';
                 } else if (previousOrientation === 0 && currentOrientation === -90) {
-                    rotChange.textContent = 'Rotated counter-clockwise';
-                } else if (previousOrientation === 90 && currentOrientation === 0) {
-                    rotChange.textContent = 'Rotated counter-clockwise';
-                } else if (previousOrientation === -90 && currentOrientation === 0) {
                     rotChange.textContent = 'Rotated clockwise';
+                } else if (previousOrientation === 90 && currentOrientation === 0) {
+                    rotChange.textContent = 'Rotated clockwise';
+                } else if (previousOrientation === -90 && currentOrientation === 0) {
+                    rotChange.textContent = 'Rotated counter-clockwise';
                 } else if (previousOrientation === 90 && currentOrientation === -90) {
                     rotChange.textContent = 'Rotated counter-clockwise';
                 } else if (previousOrientation === -90 && currentOrientation === 90) {
