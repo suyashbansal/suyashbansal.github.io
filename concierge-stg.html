@@ -97,7 +97,7 @@
       }
       const advancedCallMode = (situation) => {
         const urlParams = new URLSearchParams(window.location.search);
-        const codename = urlParams.get('codename') ?? 'exmaple-site';
+        const codename = urlParams.get('codename') ?? 'temporary_herring_amaranth';
         if (situation === 1) {
           liveSwitchConcierge.startConversation(codename);
         } else if (situation === 2) {
