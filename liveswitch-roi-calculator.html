@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROI Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        div.app>div.calculator>div.userInputs input {
+            height: 44px;
+            background: #FFFFFF;
+            border: 1px solid #959BA7;
+            padding: 0px 12px;
+            gap: 4px;
+            border-radius: 8px;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.25rem;
+            letter-spacing: 0.005em;
+            font-feature-settings: 'liga' off;
+            color: #03011D;
+            width: 100% !important;
+            min-height: 38px;
+            box-sizing: border-box;
+        }
+
+        .readonly {
+            background: #F7F7F7 !important;
+        }
+
+        label {
+            position: relative;
+            min-width: 122px !important;
+            width: 30% !important;
+        }
+
+        label.append::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1rem;
+            font-weight: normal;
+            color: #555;
+        }
+
+        div.app>div.calculator>div.userInputs label.append>input {
+            padding-right: 60px;
+        }
+
+        label.prepend::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 12px;
+            left: 13px;
+            font-size: 1rem;
+            font-weight: normal;
+            color: #555;
+        }
+
+        div.app>div.calculator>div.userInputs label.prepend input {
+            padding-left: 26px !important;
+        }
+
+        input:focus {
+            border: 2px solid #2D74FF;
+            outline: none;
+        }
+
+        div.app {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+            max-width: 565px;
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: 0px 24px 32px rgba(0, 0, 0, 0.24);
+            border-radius: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            div.app {
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+                min-height: 100vh;
+            }
+
+            label.append::after, label.prepend::before {
+                top: 12px;
+            }
+
+            span.result {
+                font-size: 2.5rem;
+            }
+
+            div.userInputs {
+                gap: 26px;
+            }
+
+            div.userInputs>div>span {
+                font-size: 0.925rem;
+            }
+
+            p.note {
+                font-size: 0.7rem;
+                line-height: 1rem;
+            }
+
+            div.buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            div.information-popup {
+                letter-spacing: normal;
+                font-size: 0.825rem;
+                line-height: 1.1rem;
+                margin: 0 10px;
+                max-width: calc(100% - 20px);
+                bottom: 80px;
+                padding: 12px;
+                left: 0;
+            }
+
+            div.information-popup ul {
+                padding-left: 16px;
+            }
+
+            div.information-popup ul>li {
+                margin-bottom: 8px;
+            }
+        }
+
+        div.heading {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        div.return {
+            border-radius: 20px 20px 0 0;
+            background-color: #03011D;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+        }
+
+        div.title img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        div.results {
+            background: #FFFFFF;
+            border-radius: 16px;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 40px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        span.result {
+            font-family: 'Inter Tight';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 3rem;
+            line-height: 110%;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            letter-spacing: -0.047rem;
+            color: #03011D;
+        }
+
+        div.rating {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 4px 0;
+            gap: 8px;
+            background: #03011D;
+            transition: background-color 0.3s ease;
+        }
+
+        div.rating.Excellent {
+            background-color: #0070FF;
+        }
+
+        div.rating.Good {
+            background-color: #22AF6C;
+        }
+
+        div.rating.Average {
+            background-color: #7141C5;
+        }
+
+        div.rating.Poor {
+            background-color: #DF4338;
+        }
+
+        div.rating>span {
+            font-family: 'Inter Tight';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 1.5rem;
+            line-height: 2.25rem;
+            display: flex;
+            align-items: center;
+            color: #FFFFFF;
+            min-height: 42px; /* Prevent layout shift when empty */
+        }
+        
+        div.rating > span img {
+            margin-right: 8px;
+        }
+
+        div.calculator {
+            flex-grow: 1;
+            padding: 20px 33.5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        div.userInputs {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-items: flex-start;
+            gap: 16px;
+            justify-items: stretch;
+        }
+
+        div.userInputs>div {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            position: relative;
+            gap: 20px;
+            width: 100% !important;
+        }
+
+        div.userInputs>div>span {
+            width: 70% !important;
+        }
+        
+        div.userInputs>div>.readonly-label {
+            color: #959BA7;
+        }
+
+        div.userInputs img.info-icon {
+            cursor: pointer;
+        }
+
+        .note {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 0.725rem;
+            line-height: 1rem;
+            letter-spacing: 0.0025em;
+            color: #6c757d;
+        }
+
+        div.buttons {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            padding: 0px;
+            gap: 12px;
+            text-transform: uppercase;
+        }
+
+        div.btn {
+            box-sizing: border-box;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 1rem;
+            line-height: 1.188rem;
+            letter-spacing: 0.00892857em;
+            text-transform: uppercase;
+            color: #03011D;
+            border-radius: 8px;
+            text-align: center;
+            padding: 16.5px 24px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        div.btn-primary {
+            background: #FFB157;
+            flex-grow: 1;
+            border: 1px solid #FFB157;
+        }
+        
+        div.btn-primary:hover {
+            background: #fca13a;
+        }
+
+        div.btn-clear {
+            border: 1px solid #03011D;
+        }
+        
+        div.btn-clear:hover {
+            background: #f1f1f1;
+        }
+
+        div.notes {
+            margin: 20px 0;
+        }
+
+        div.hidden {
+            display: none;
+        }
+
+        .information-popup {
+            display: block;
+            position: absolute;
+            z-index: 999;
+            width: calc(100% - 67px);
+            max-width: 498px;
+            background-color: #03011D;
+            padding: 16px;
+            bottom: 60px;
+            left: 0;
+            border: 1px solid #03011D;
+            border-radius: 8px;
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 0.8rem;
+            line-height: 1.2rem;
+            color: #ABABAB;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="heading">
+            <div class="return">
+                <div class="title"><img src="https://www.liveswitch.com/hubfs/0%20-%20LiveSwitch.com%20-%20Website%20-%20v2/liveswitch.com%20-%20contact%20product/Return%20on%20Investment%20Calculator.svg" alt="Return On Investment Calculator"></div>
+                <div class="results"><span class="result">0%</span></div>
+            </div>
+            <div class="rating">
+                <span></span>
+            </div>
+        </div>
+        <div class="calculator">
+            <div class="userInputs">
+                <div>
+                    <label>
+                        <input name="estimatesPerWeek" min="0" step="1" type="number" value="0">
+                    </label>
+                    <span>On-site visits per week?</span>
+                </div>
+                <div>
+                    <label class="append" data-text="miles">
+                        <input name="distancePerEstimate" type="number" step="0.5" value="0" min="0">
+                    </label>
+                    <span>Average distance traveled per on-site visit?</span>
+                </div>
+                <div>
+                    <label class="append" data-text="hours">
+                        <input name="estimateTakesHours" type="number" step="0.5" value="0" min="0">
+                    </label>
+                    <span>How long does an on-site visit take?</span>
+                </div>
+                <div>
+                    <label class="prepend single" data-text="$">
+                        <input name="averageContractValue" min="0" step="0.5" type="number" value="0">
+                    </label>
+                    <span>Average contract value?</span>
+                </div>
+                <div>
+                    <label>
+                        <input name="numberOfSeats" type="number" min="0" step="1" value="0" />
+                    </label>
+                    <span>How many employees perform on-site visits?</span>
+                </div>
+                <div>
+                    <div class="information-popup hidden">
+                        <span>Calculated as: (Potential Earnings + Cost Savings - Investment).</span><br /><br />
+                        <span>Notes: </span>
+                        <ul>
+                            <li><b>Potential Earnings</b> are calculated based on the additional virtual estimates that can be performed in the time saved from travel and on-site visits.</li>
+                            <li><b>Cost Savings</b> are calculated from reduced fuel costs and reclaimed employee wages during travel time.</li>
+                            <li><b>Investment</b> is the cost of our product, calculated based on the number of users.</li>
+                        </ul>
+                        <span>Key Assumptions:</span>
+                         <ul>
+                            <li>Average driving speed: 30 MPH</li>
+                            <li>Average vehicle fuel efficiency: 25 MPG</li>
+                            <li>Average gas price: $4.215 per gallon</li>
+                            <li>Average employee wage: $11/hour</li>
+                            <li>Close rate on new estimates: 30%</li>
+                            <li>Profit margin on contracts: 10%</li>
+                            <li>For more than 8 users, custom pricing is required. For this calculator, investment is estimated at $10,000 for 9+ users.</li>
+                        </ul>
+                    </div>
+                    <label class="prepend readonly" data-text="$">
+                        <input name="extraCashPerYear" type="text" value="0.00" readonly>
+                    </label>
+                    <span class="readonly-label">Potential earnings & savings per year </span>
+                    <a class="rollover" onmouseover="showHelp()" onmouseleave="hideHelp()">
+                        <img class="info-icon" src="https://www.liveswitch.com/hubfs/0%20-%20LiveSwitch.com%20-%20Website%20-%20v2/liveswitch.com%20-%20contact%20product/Circle-Info.svg" alt="help">
+                    </a>
+                </div>
+            </div>
+            <div class="notes">
+                <p class="note">Potential earnings, savings and ROI are not guaranteed. The figures presented are based on the earnings and savings assumptions found in the icon button above and the information provided by the website visitor. These figures are subject to change and the actual earnings and savings may vary. LiveSwitch Inc. is not responsible or liable for any deviations in the potential earnings, savings or ROI provided.</p>
+            </div>
+            <div class="buttons">
+                <div class="btn btn-primary" onclick="runCalculation();">Calculate</div>
+                <div class="btn btn-clear" onclick="clearCalculator();">Clear</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        // State and assumptions for the calculator
+        let vars = {
+            estimatesPerWeek: 0,
+            distancePerEstimate: 0,
+            estimateTakesHours: 0,
+            averageContractValue: 0,
+            numberOfSeats: 0,
+            // --- Assumptions ---
+            averageSpeedDriven: 30,    // MPH
+            averageMpg: 25,            // **FIXED: Added MPG for correct fuel calculation**
+            percentOfEstimatesClosed: 30,
+            profitMargin: 0.10,
+            employeeHourlyWage: 11,
+            averageFuelCosts: 4.215,   // Per gallon
+            // --- Calculated values ---
+            costOfProduct: 0,
+            extraCashPerYear: 0,
+            roi: 0,
+            rating: "",
+        };
+
+        let getSeatCost = (value) => {
+            if (value <= 2) return 1200;
+            if (value == 3) return 1750;
+            if (value == 4) return 2300;
+            if (value == 5) return 2800;
+            if (value == 6) return 3300;
+            if (value == 7) return 3750;
+            if (value == 8) return 5000;
+            if (value > 8) return 10000;
+            return 0;
+        };
+
+        let getRoiText = (value) => {
+            if (isNaN(value) || !isFinite(value)) return "";
+            if (value > 50) return "Excellent";
+            if (value > 20) return "Good";
+            if (value >= 10) return "Average";
+            return "Poor";
+        };
+
+        let updateVars = () => {
+            var inputs = document.querySelectorAll('input:not([readonly])');
+            inputs.forEach(element => {
+                // **FIXED: Fallback to 0 for empty inputs to prevent NaN errors**
+                vars[element.name] = parseFloat(element.value) || 0;
+            });
+        };
+
+        let updateUI = () => {
+            document.querySelector('input[name="extraCashPerYear"]').value = vars.extraCashPerYear;
+            
+            const resultSpan = document.querySelector('span.result');
+            resultSpan.innerHTML = `${vars.roi}%`;
+            
+            const ratingSpan = document.querySelector('div.rating > span');
+            const ratingDiv = document.querySelector('div.rating');
+
+            ratingDiv.className = 'rating'; // Reset classes
+            if (vars.rating) {
+                ratingSpan.innerHTML = `<img src="https://www.liveswitch.com/hubfs/0%20-%20LiveSwitch.com%20-%20Website%20-%20v2/liveswitch.com%20-%20contact%20product/Rating.svg" alt="Rating"> ${vars.rating}!`;
+                ratingDiv.classList.add(vars.rating);
+            } else {
+                 ratingSpan.innerHTML = '';
+            }
+        };
+
+        let runCalculation = () => {
+            updateVars();
+
+            // --- Calculation Logic ---
+            const totalDistanceTraveledPerWeek = vars.estimatesPerWeek * vars.distancePerEstimate;
+            const timeSpendDrivingInAweek = vars.averageSpeedDriven > 0 ? (totalDistanceTraveledPerWeek / vars.averageSpeedDriven) : 0;
+            
+            // **FIXED: Calculation now includes time for on-site visits, not just driving time.**
+            const timeOnSitePerWeek = vars.estimatesPerWeek * vars.estimateTakesHours;
+            const totalTimeSavedPerWeek = timeSpendDrivingInAweek + timeOnSitePerWeek;
+            
+            // **FIXED: Added check for 'estimateTakesHours > 0' to prevent division by zero.**
+            const extraEstimatesPerWeek = vars.estimateTakesHours > 0 ? (totalTimeSavedPerWeek / vars.estimateTakesHours) : 0;
+
+            const additionalRevenuePerWeek = (extraEstimatesPerWeek * (vars.percentOfEstimatesClosed / 100)) * (vars.averageContractValue * vars.profitMargin);
+            const additionalRevenueYear = additionalRevenuePerWeek * 52;
+
+            // **FIXED: Corrected fuel cost calculation using MPG.**
+            const weeklyFuelCost = (vars.averageMpg > 0) ? (totalDistanceTraveledPerWeek / vars.averageMpg) * vars.averageFuelCosts : 0;
+            const weeklyLaborSavingsFromDriving = vars.employeeHourlyWage * timeSpendDrivingInAweek;
+            const totalAnnualSavings = (weeklyFuelCost + weeklyLaborSavingsFromDriving) * 52;
+            
+            vars.costOfProduct = getSeatCost(vars.numberOfSeats);
+            
+            const extraCashPerYearNum = (additionalRevenueYear + totalAnnualSavings) - vars.costOfProduct;
+
+            // **FIXED: Added check for 'costOfProduct > 0' to prevent division by zero.**
+            const roiNum = vars.costOfProduct > 0 ? (extraCashPerYearNum / vars.costOfProduct) * 100 : 0;
+            
+            // --- Format for Display ---
+            vars.roi = isFinite(roiNum) ? parseFloat(roiNum.toFixed(0)).toLocaleString("en-US") : "0";
+            vars.extraCashPerYear = isFinite(extraCashPerYearNum) ? parseFloat(extraCashPerYearNum.toFixed(2)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+            vars.rating = getRoiText(roiNum);
+            
+            // Handle cases where ROI is infinite (e.g., cost is 0 but there are savings)
+            if (!isFinite(roiNum) && extraCashPerYearNum > 0) {
+                vars.roi = "∞"; // Display infinity symbol for a more accurate representation
+                vars.rating = "Excellent";
+            }
+
+            updateUI();
+
+            if (roiNum > 20) {
+                confetti({
+                    particleCount: 150,
+                    spread: 180,
+                    origin: { y: 0.6 }
+                });
+            }
+        };
+
+        let clearCalculator = () => {
+            var inputs = document.querySelectorAll('input:not([readonly])');
+            inputs.forEach(element => {
+                element.value = 0;
+            });
+            runCalculation();
+             // Also explicitly clear the rating text
+            document.querySelector('div.rating > span').innerHTML = '';
+            document.querySelector('div.rating').className = 'rating';
+        };
+
+        let showHelp = () => {
+            document.querySelector('div.information-popup').classList.remove("hidden");
+        };
+        let hideHelp = () => {
+            document.querySelector('div.information-popup').classList.add("hidden");
+        };
+
+        // Run once on load to initialize UI correctly
+        document.addEventListener('DOMContentLoaded', runCalculation);
+    </script>
+</body>
+</html>
