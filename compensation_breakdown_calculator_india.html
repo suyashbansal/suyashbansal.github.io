@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compensation Breakdown Calculator (India)</title>
+  <!-- Tailwind CSS CDN (works with v3+/v4 class names) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config (optional fine-tuning)
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+          },
+          boxShadow: {
+            glass: "0 10px 30px rgba(2,6,23,0.1)",
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light dark; }
+    html { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .card {
+      @apply rounded-2xl bg-white/80 dark:bg-slate-900/60 backdrop-blur shadow-glass ring-1 ring-slate-900/5; 
+    }
+    .label { @apply text-sm font-medium text-slate-600 dark:text-slate-300; }
+    .value { @apply font-semibold text-slate-800 dark:text-slate-100; }
+    .muted { @apply text-xs text-slate-500 dark:text-slate-400; }
+    .btn { @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold ring-1 ring-slate-900/10 shadow-sm hover:shadow transition; }
+    .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-500; }
+    .btn-secondary { @apply bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100; }
+    .grid-form { @apply grid grid-cols-1 md:grid-cols-2 gap-4; }
+    .table { @apply w-full text-sm; }
+    .table th { @apply text-left font-semibold text-slate-700 dark:text-slate-200; }
+    .table td { @apply text-slate-800 dark:text-slate-100; }
+    .section-title { @apply text-lg font-bold tracking-tight text-slate-800 dark:text-white; }
+    .kpi { @apply rounded-xl bg-slate-50 dark:bg-slate-800/70 px-4 py-3 ring-1 ring-slate-900/5; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 text-slate-900 dark:text-slate-100">
+  <div class="mx-auto max-w-6xl p-6 md:p-10">
+    <header class="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-black tracking-tight">Compensation Breakdown Calculator — India</h1>
+        <p class="muted mt-1">Compute a polished monthly/annual salary structure from either Total Gross Salary or Total Cost to Company (CTC).</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnPrint" class="btn btn-secondary" title="Print / Save as PDF">🖨️ Print</button>
+        <button id="btnReset" class="btn" title="Reset form">↺ Reset</button>
+      </div>
+    </header>
+
+    <!-- Input Card -->
+    <section class="card p-6 md:p-8">
+      <h2 class="section-title mb-4">Inputs</h2>
+      <form id="compForm" class="space-y-6">
+        <div class="grid-form">
+          <label class="block">
+            <span class="label">Candidate Name</span>
+            <input id="candidateName" type="text" placeholder="e.g., Mohd Yasir Ali" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 px-3 py-2 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" required />
+          </label>
+          <label class="block">
+            <span class="label">Job Title</span>
+            <input id="jobTitle" type="text" placeholder="e.g., Growth Manager" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 px-3 py-2 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" required />
+          </label>
+        </div>
+
+        <div class="grid-form">
+          <fieldset class="rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+            <legend class="label">Salary Mode</legend>
+            <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="mode" value="gross" class="scale-110" checked>
+                <span>Total Gross Salary (₹)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="mode" value="ctc" class="scale-110">
+                <span>Total Cost to Company — CTC (₹)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="annualToggle" class="scale-110">
+                <span>I am entering an <span class="font-semibold">Annual</span> amount</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="block">
+            <span class="label">Amount</span>
+            <input id="amountInput" type="number" inputmode="decimal" min="0" step="1" placeholder="e.g., 1200000 for ₹12,00,000" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 px-3 py-2 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" required />
+            <p class="muted mt-1">Tip: Enter integers in rupees. Toggle <em>Annual</em> if the number is yearly.</p>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button type="submit" class="btn btn-primary">Calculate Breakdown</button>
+          <span id="assumption" class="muted">Assumptions: Basic = 40% of Gross; HRA = 40% of Basic; Conveyance = ₹1,600/month; PF (Employer) = 12% of Basic; Gratuity = 4.81% of Basic.</span>
+        </div>
+      </form>
+    </section>
+
+    <!-- Output Card -->
+    <section id="outputCard" class="card p-6 md:p-8 mt-8 hidden print:block">
+      <div class="flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <h2 class="section-title">Offer Summary</h2>
+          <p class="muted">Auto-generated compensation structure</p>
+        </div>
+        <div class="kpi">
+          <p class="muted">Mode</p>
+          <p class="value" id="modeSummary">—</p>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="kpi"><p class="muted">Candidate</p><p class="value" id="outName">—</p></div>
+        <div class="kpi"><p class="muted">Job Title</p><p class="value" id="outTitle">—</p></div>
+        <div class="kpi"><p class="muted">Effective Date</p><p class="value" id="outDate">—</p></div>
+      </div>
+
+      <!-- Table -->
+      <div class="mt-6 overflow-hidden rounded-2xl ring-1 ring-slate-900/5">
+        <table class="table">
+          <thead class="bg-slate-50 dark:bg-slate-800/60">
+            <tr>
+              <th class="p-3">S. No.</th>
+              <th class="p-3">Component</th>
+              <th class="p-3 text-right">Monthly (₹)</th>
+              <th class="p-3 text-right">Annual (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyRows" class="bg-white/70 dark:bg-slate-900/40"></tbody>
+          <tfoot class="bg-slate-50/80 dark:bg-slate-800/50">
+            <tr class="font-bold">
+              <td class="p-3"></td>
+              <td class="p-3">Gross Salary Total</td>
+              <td id="grossMonthly" class="p-3 text-right">—</td>
+              <td id="grossAnnual" class="p-3 text-right">—</td>
+            </tr>
+            <tr><td colspan="4" class="p-2"></td></tr>
+            <tr>
+              <td class="p-3"></td>
+              <td class="p-3 font-semibold">Retiral Benefits</td>
+              <td class="p-3"></td>
+              <td class="p-3"></td>
+            </tr>
+            <tr>
+              <td class="p-3 text-slate-500">1.</td>
+              <td class="p-3">Employer Contribution to Provident Fund (12% of Basic)</td>
+              <td id="pfMonthly" class="p-3 text-right">—</td>
+              <td id="pfAnnual" class="p-3 text-right">—</td>
+            </tr>
+            <tr>
+              <td class="p-3 text-slate-500">2.</td>
+              <td class="p-3">Gratuity (4.81% of Basic)</td>
+              <td id="graMonthly" class="p-3 text-right">—</td>
+              <td id="graAnnual" class="p-3 text-right">—</td>
+            </tr>
+            <tr class="font-extrabold text-indigo-700 dark:text-indigo-300">
+              <td class="p-3"></td>
+              <td class="p-3">Total Cost to Company (CTC)</td>
+              <td id="ctcMonthly" class="p-3 text-right">—</td>
+              <td id="ctcAnnual" class="p-3 text-right">—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p class="muted mt-4">Notes: Special Allowance is a balancing figure to achieve the chosen Gross Salary. Amounts are rounded to the nearest rupee. This is an illustrative breakup; tax treatment depends on prevailing law and individual declarations.</p>
+    </section>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const inr = (n) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.round(n || 0));
+    const today = () => new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
+
+    function computeFromGross(gross) {
+      const basic = 0.40 * gross;
+      const hra = 0.40 * basic;         // 16% of gross
+      const convey = 1600 * 12;         // annual fixed
+      const special = gross - (basic + hra + convey);
+      const pf = 0.12 * basic;
+      const gratuity = 0.0481 * basic;
+      const ctc = gross + pf + gratuity;
+      return { gross, basic, hra, convey, special, pf, gratuity, ctc };
+    }
+
+    function computeFromCTC(ctc) {
+      // CTC = Gross + (12% + 4.81%) of Basic, where Basic = 40% of Gross
+      // => CTC = Gross + 0.1681 * 0.4 * Gross = 1.06724 * Gross
+      const gross = ctc / 1.06724;
+      return computeFromGross(gross);
+    }
+
+    function toMonthlyAnnual(annual) {
+      return { m: annual / 12, a: annual };
+    }
+
+    function fillRow(idx, label, annual) {
+      const { m, a } = toMonthlyAnnual(annual);
+      return `
+        <tr>
+          <td class="p-3 text-slate-500">${idx}.</td>
+          <td class="p-3">${label}</td>
+          <td class="p-3 text-right">${inr(m)}</td>
+          <td class="p-3 text-right">${inr(a)}</td>
+        </tr>
+      `;
+    }
+
+    function renderOutput(payload, meta) {
+      const rows = [];
+      rows.push(fillRow(1, 'Basic', payload.basic));
+      rows.push(fillRow(2, 'House Rent Allowance (HRA)', payload.hra));
+      rows.push(fillRow(3, 'Conveyance Allowance', payload.convey));
+      rows.push(fillRow(4, 'Special Allowance', payload.special));
+
+      document.getElementById('tbodyRows').innerHTML = rows.join('');
+
+      // Totals
+      const gm = toMonthlyAnnual(payload.gross);
+      document.getElementById('grossMonthly').textContent = inr(gm.m);
+      document.getElementById('grossAnnual').textContent  = inr(gm.a);
+
+      const pf = toMonthlyAnnual(payload.pf);
+      document.getElementById('pfMonthly').textContent = inr(pf.m);
+      document.getElementById('pfAnnual').textContent  = inr(pf.a);
+
+      const gr = toMonthlyAnnual(payload.gratuity);
+      document.getElementById('graMonthly').textContent = inr(gr.m);
+      document.getElementById('graAnnual').textContent  = inr(gr.a);
+
+      const ctc = toMonthlyAnnual(payload.ctc);
+      document.getElementById('ctcMonthly').textContent = inr(ctc.m);
+      document.getElementById('ctcAnnual').textContent  = inr(ctc.a);
+
+      // Header
+      document.getElementById('outName').textContent  = meta.name || '—';
+      document.getElementById('outTitle').textContent = meta.title || '—';
+      document.getElementById('outDate').textContent  = today();
+      document.getElementById('modeSummary').textContent = meta.modeLabel;
+
+      document.getElementById('outputCard').classList.remove('hidden');
+      window.scrollTo({ top: document.getElementById('outputCard').offsetTop - 16, behavior: 'smooth' });
+    }
+
+    // ===== Event Handlers =====
+    const form = document.getElementById('compForm');
+    const amountInput = document.getElementById('amountInput');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('candidateName').value.trim();
+      const title = document.getElementById('jobTitle').value.trim();
+      const isAnnual = document.getElementById('annualToggle').checked;
+      const mode = new FormData(form).get('mode'); // 'gross' | 'ctc'
+      const raw = parseFloat(amountInput.value || '0');
+
+      if (!raw || raw <= 0) {
+        alert('Please enter a valid amount in rupees.');
+        return;
+      }
+
+      // Normalize entered amount to ANNUAL rupees for computation
+      const annualAmount = isAnnual ? raw : raw * 12;
+
+      // Compute
+      const payload = mode === 'gross' ? computeFromGross(annualAmount) : computeFromCTC(annualAmount);
+
+      // Guard: if special allowance goes negative due to tiny gross
+      if (payload.special < 0) {
+        alert('The entered amount is too low for the configured assumptions (₹1,600/month conveyance). Please enter a higher value.');
+        return;
+      }
+
+      const modeLabel = `${mode === 'gross' ? 'Based on Total Gross Salary' : 'Based on Total Cost to Company (CTC)'}${isAnnual ? ' — Annual input' : ' — Monthly input'}`;
+      renderOutput(payload, { name, title, modeLabel });
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      form.reset();
+      document.getElementById('outputCard').classList.add('hidden');
+      amountInput.value = '';
+      amountInput.focus();
+    });
+
+    document.getElementById('btnPrint').addEventListener('click', () => {
+      if (document.getElementById('outputCard').classList.contains('hidden')) {
+        alert('Please calculate a breakdown first.');
+        return;
+      }
+      window.print();
+    });
+
+    // Prefill for a quick demo (12 LPA Gross)
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('candidateName').value = 'Mohd Yasir Ali';
+      document.getElementById('jobTitle').value = 'Growth Manager';
+      document.querySelector('input[value="gross"]').checked = true;
+      document.getElementById('annualToggle').checked = true;
+      amountInput.value = 1200000;
+    });
+      // Copy & extra print handlers
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'btnPrint2') {
+        e.preventDefault();
+        window.print();
+      }
+      if (e.target && e.target.id === 'btnCopy') {
+        if (document.getElementById('outputCard').classList.contains('hidden')) {
+          alert('No breakdown to copy yet.');
+          return;
+        }
+        const text = buildClipboardPayload();
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = e.target;
+          const original = btn.textContent;
+          btn.textContent = '✅ Copied';
+          setTimeout(() => (btn.textContent = original), 1500);
+        }).catch(() => alert('Copy failed. Your browser may block clipboard access.'));
+      }
+    });
+  </script>
+</body>
+</html>
