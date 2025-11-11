@@ -27,14 +27,12 @@
   <style>
     :root { color-scheme: light dark; }
     html { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .card {
-      @apply rounded-2xl bg-white/80 dark:bg-slate-900/60 backdrop-blur shadow-glass ring-1 ring-slate-900/5; 
-    }
+    .card { @apply rounded-2xl bg-white/80 dark:bg-slate-900/60 backdrop-blur shadow-glass ring-1 ring-slate-200 dark:ring-slate-700 border border-slate-200/80 dark:border-slate-700/60; }
     .label { @apply text-sm font-medium text-slate-600 dark:text-slate-300; }
     .value { @apply font-semibold text-slate-800 dark:text-slate-100; }
     .muted { @apply text-xs text-slate-500 dark:text-slate-400; }
     .btn { @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 font-semibold ring-1 ring-slate-900/10 shadow-sm hover:shadow transition; }
-    .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-500; }
+    .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-500 ring-blue-600/20; }
     .btn-secondary { @apply bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100; }
     .grid-form { @apply grid grid-cols-1 md:grid-cols-2 gap-4; }
     .table { @apply w-full text-sm; }
@@ -59,6 +57,10 @@
 
     <!-- Input Card -->
     <section class="card p-6 md:p-8">
+      <div class="-mt-8 mb-4 flex w-full items-center gap-2">
+        <span class="inline-flex select-none rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200 px-3 py-1 text-xs font-semibold">INPUT</span>
+        <span class="muted">Enter candidate details & choose Gross or CTC</span>
+      </div>
       <h2 class="section-title mb-4">Inputs</h2>
       <form id="compForm" class="space-y-6">
         <div class="grid-form">
@@ -100,13 +102,26 @@
 
         <div class="flex items-center gap-3">
           <button type="submit" class="btn btn-primary">Calculate Breakdown</button>
-          <span id="assumption" class="muted">Assumptions: Basic = 40% of Gross; HRA = 40% of Basic; Conveyance = ₹1,600/month; PF (Employer) = 12% of Basic; Gratuity = 4.81% of Basic.</span>
         </div>
+        <details class="mt-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-3 ring-1 ring-slate-200 dark:ring-slate-700">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-200">Assumptions</summary>
+          <p class="muted mt-2">Basic = 40% of Gross; HRA = 40% of Basic; Conveyance = ₹1,600/month; PF (Employer) = 12% of (Basic + Conveyance + Special); Gratuity = 4.81% of Basic. Amounts are indicative and rounded to the nearest rupee.</p>
+        </details>
       </form>
     </section>
 
     <!-- Output Card -->
     <section id="outputCard" class="card p-6 md:p-8 mt-8 hidden print:block">
+      <div class="-mt-8 mb-4 flex w-full items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex select-none rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-3 py-1 text-xs font-semibold">OUTPUT</span>
+          <span class="muted">Calculated breakdown</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btnCopy" class="btn btn-secondary" title="Copy table data">📋 Copy</button>
+          <button id="btnPrint2" class="btn btn-secondary" title="Print / Save as PDF">🖨️ Print</button>
+        </div>
+      </div>
       <div class="flex flex-wrap items-start justify-between gap-6">
         <div>
           <h2 class="section-title">Offer Summary</h2>
@@ -152,7 +167,7 @@
             </tr>
             <tr>
               <td class="p-3 text-slate-500">1.</td>
-              <td class="p-3">Employer Contribution to Provident Fund (12% of Basic)</td>
+              <td class="p-3">Employer Contribution to Provident Fund (12% of Basic + Conveyance + Special)</td>
               <td id="pfMonthly" class="p-3 text-right">—</td>
               <td id="pfAnnual" class="p-3 text-right">—</td>
             </tr>
@@ -172,7 +187,10 @@
         </table>
       </div>
 
-      <p class="muted mt-4">Notes: Special Allowance is a balancing figure to achieve the chosen Gross Salary. Amounts are rounded to the nearest rupee. This is an illustrative breakup; tax treatment depends on prevailing law and individual declarations.</p>
+      <details class="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-3 ring-1 ring-slate-200 dark:ring-slate-700">
+        <summary class="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</summary>
+        <p class="muted mt-2">Special Allowance is a balancing figure to achieve the chosen Gross Salary. Amounts are rounded to the nearest rupee. This is an illustrative breakup; tax treatment depends on prevailing law and individual declarations.</p>
+      </details>
     </section>
   </div>
 
@@ -186,16 +204,19 @@
       const hra = 0.40 * basic;         // 16% of gross
       const convey = 1600 * 12;         // annual fixed
       const special = gross - (basic + hra + convey);
-      const pf = 0.12 * basic;
+      const pf = 0.12 * (basic + convey + special); // 12% of (Basic + Conveyance + Special)
       const gratuity = 0.0481 * basic;
       const ctc = gross + pf + gratuity;
       return { gross, basic, hra, convey, special, pf, gratuity, ctc };
     }
 
     function computeFromCTC(ctc) {
-      // CTC = Gross + (12% + 4.81%) of Basic, where Basic = 40% of Gross
-      // => CTC = Gross + 0.1681 * 0.4 * Gross = 1.06724 * Gross
-      const gross = ctc / 1.06724;
+      // New PF basis: 12% of (Basic + Conveyance + Special) = 12% of (Gross - HRA)
+      // With Basic = 40% of Gross and HRA = 40% of Basic = 16% of Gross:
+      // PF = 12% * (Gross - 0.16*Gross) = 0.1008 * Gross
+      // Gratuity = 4.81% of Basic = 4.81% * 0.4 * Gross = 0.01924 * Gross
+      // => CTC = Gross * (1 + 0.1008 + 0.01924) = 1.12004 * Gross
+      const gross = ctc / 1.12004;
       return computeFromGross(gross);
     }
 
@@ -214,6 +235,10 @@
         </tr>
       `;
     }
+
+    // Globals for copy/export
+    let lastPayload = null;
+    let lastMeta = null;
 
     function renderOutput(payload, meta) {
       const rows = [];
@@ -246,6 +271,10 @@
       document.getElementById('outTitle').textContent = meta.title || '—';
       document.getElementById('outDate').textContent  = today();
       document.getElementById('modeSummary').textContent = meta.modeLabel;
+
+      // Persist for copy/export
+      lastPayload = payload;
+      lastMeta = meta;
 
       document.getElementById('outputCard').classList.remove('hidden');
       window.scrollTo({ top: document.getElementById('outputCard').offsetTop - 16, behavior: 'smooth' });
@@ -299,15 +328,36 @@
       window.print();
     });
 
-    // Prefill for a quick demo (12 LPA Gross)
+    // Prefill for a quick demo (12 LPA Gross) + Self-tests
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('candidateName').value = 'Mohd Yasir Ali';
       document.getElementById('jobTitle').value = 'Growth Manager';
       document.querySelector('input[value="gross"]').checked = true;
       document.getElementById('annualToggle').checked = true;
       amountInput.value = 1200000;
+
+      // --- Existing tests (kept intact) ---
+      const example = computeFromGross(1200000); // 12 LPA Gross
+      console.assert(Math.round(example.basic) === 480000, 'Test: Basic should be 40% of gross');
+      console.assert(Math.round(example.hra) === 192000, 'Test: HRA should be 40% of Basic');
+      console.assert(Math.round(example.convey) === 19200, 'Test: Conveyance should be 1600*12');
+
+      // --- Additional tests (new) ---
+      // PF should be 12% of (basic + convey + special) which equals 12% of (gross - hra)
+      console.assert(
+        Math.round(example.pf) === Math.round(0.12 * (example.basic + example.convey + example.special)),
+        'Test: PF should be 12% of (Basic+Conveyance+Special)'
+      );
+      console.assert(
+        Math.round(example.pf) === Math.round(0.1008 * 1200000),
+        'Test: PF should be ~10.08% of gross (for 12 LPA)'
+      );
+      // CTC factor check from CTC->Gross inversion
+      const back = computeFromCTC(example.ctc);
+      console.assert(Math.abs(back.gross - 1200000) < 1, 'Test: computeFromCTC inverse should recover gross');
     });
-      // Copy & extra print handlers
+
+    // Copy & secondary print handlers
     document.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'btnPrint2') {
         e.preventDefault();
@@ -327,6 +377,35 @@
         }).catch(() => alert('Copy failed. Your browser may block clipboard access.'));
       }
     });
+
+    function buildClipboardPayload() {
+      if (!lastPayload || !lastMeta) return '';
+      const lines = [];
+      lines.push('Candidate\t' + (lastMeta.name || ''));
+      lines.push('Job Title\t' + (lastMeta.title || ''));
+      lines.push('Effective Date\t' + today());
+      lines.push('');
+      lines.push(['S. No.','Component','Monthly (₹)','Annual (₹)'].join('\t'));
+
+      const addRow = (i, label, annual) => {
+        const m = Math.round(annual/12);
+        lines.push([i + '.', label, inr(m), inr(annual)].join('\t'));
+      };
+
+      addRow(1, 'Basic', lastPayload.basic);
+      addRow(2, 'House Rent Allowance (HRA)', lastPayload.hra);
+      addRow(3, 'Conveyance Allowance', lastPayload.convey);
+      addRow(4, 'Special Allowance', lastPayload.special);
+
+      // Totals & retirals
+      lines.push(['','Gross Salary Total', inr(Math.round(lastPayload.gross/12)), inr(lastPayload.gross)].join('\t'));
+      lines.push(['','Retiral Benefits','',''].join('\t'));
+      lines.push(['1.','Employer Contribution to Provident Fund (12% of Basic + Conveyance + Special)', inr(Math.round(lastPayload.pf/12)), inr(lastPayload.pf)].join('\t'));
+      lines.push(['2.','Gratuity (4.81% of Basic)', inr(Math.round(lastPayload.gratuity/12)), inr(lastPayload.gratuity)].join('\t'));
+      lines.push(['','Total Cost to Company (CTC)', inr(Math.round(lastPayload.ctc/12)), inr(lastPayload.ctc)].join('\t'));
+
+      return lines.join('\n');
+    }
   </script>
 </body>
 </html>
