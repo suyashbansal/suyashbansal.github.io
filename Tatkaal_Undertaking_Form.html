@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undertaking for Tatkaal Scheme</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Noto+Serif+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --rule:#333;
+    --soft:#666;
+    --accent:#0b3d6b;
+    --fill:#fffdf7;
+    --field:#fbfaf4;
+    --field-focus:#fff6d8;
+    --serif:"Noto Serif","Noto Serif Devanagari",Georgia,"Times New Roman",serif;
+    --sans:"Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+
+  /* --- minimal reset / normalization --- */
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body,h1,p,ul,li,table,div{margin:0;padding:0;}
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  button,input{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit;}
+  table{border-collapse:collapse;}
+  ul{list-style:disc;}
+
+  body{
+    background:#e9e7e0;
+    font-family:var(--serif);
+    color:var(--ink);
+    line-height:1.5;
+    font-size:13px;
+  }
+
+  /* Toolbar (screen only) — own font + line-height so it never shifts on language toggle */
+  .toolbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:var(--accent);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 18px;
+    min-height:64px;
+    font-family:var(--sans);
+    line-height:1.35;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+    flex-wrap:wrap;
+  }
+  .tb-left{display:flex;flex-direction:column;gap:2px;}
+  .toolbar strong{font-size:14px;letter-spacing:.3px;font-weight:700;}
+  .toolbar .hint{font-size:12px;opacity:.85;font-weight:400;}
+  .tb-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
+  /* Segmented language toggle */
+  .lang-switch{
+    display:inline-flex;
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.5);
+    border-radius:20px;
+    padding:2px;
+  }
+  .lang-switch button{
+    border:none;
+    background:transparent;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    padding:5px 14px;
+    border-radius:18px;
+    cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+  }
+  .lang-switch button.active{ background:#fff; color:var(--accent); }
+
+  .toolbar .act{
+    font-size:13px;
+    font-weight:600;
+    border:none;
+    border-radius:6px;
+    padding:8px 16px;
+    cursor:pointer;
+    background:#fff;
+    color:var(--accent);
+    transition:transform .08s ease, box-shadow .15s ease;
+  }
+  .toolbar .act:hover{box-shadow:0 2px 6px rgba(0,0,0,.25);}
+  .toolbar .act:active{transform:translateY(1px);}
+  .toolbar .act.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);}
+
+  .page{
+    background:var(--fill);
+    width:210mm;
+    max-width:100%;
+    margin:18px auto;
+    padding:16mm 15mm;
+    box-shadow:0 4px 18px rgba(0,0,0,.15);
+  }
+
+  h1{
+    text-align:center;
+    font-size:16px;
+    margin:0 0 4px;
+    text-decoration:underline;
+    letter-spacing:.4px;
+  }
+  .applied-as{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:4px 8px;
+    font-weight:bold;
+    font-size:13.5px;
+    margin:0 0 14px;
+  }
+  .applied-as label{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin:0;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  .intro p{margin:6px 0;}
+  .intro ul{margin:8px 0;padding-left:22px;}
+  .intro li{margin:5px 0;}
+
+  .section-head{ font-weight:bold; margin:18px 0 6px; }
+  .note{font-style:italic;text-decoration:underline;font-weight:normal;display:block;margin-top:4px;}
+  em.plain{font-style:italic;}
+
+  table{ table-layout:fixed; width:100%; margin-top:6px; }
+  th,td{
+    border:1px solid var(--rule);
+    padding:6px 8px;
+    vertical-align:top;
+    text-align:left;
+    overflow-wrap:break-word;
+    word-wrap:break-word;
+  }
+  thead th{ background:#efece2; font-size:12.5px; }
+  .col-sr{width:44px;text-align:center;}
+  .col-sel{width:150px;text-align:center;}
+  td.col-sr{text-align:center;}
+  td.col-sel{text-align:center;vertical-align:middle;}
+  .strong-italic{font-weight:bold;font-style:italic;}
+
+  .addr-table td{width:50%;}
+  .addr-cell{display:flex;align-items:flex-start;gap:8px;}
+  .addr-cell .txt{flex:1;}
+
+  input[type="text"]{
+    font-family:var(--serif);
+    font-size:13px;
+    border:none;
+    border-bottom:1px solid #999;
+    background:var(--field);
+    padding:2px 4px;
+    min-width:60px;
+  }
+  input[type="text"]:focus{
+    outline:none;
+    background:var(--field-focus);
+    border-bottom:1px solid var(--accent);
+  }
+  input.fill-line{ width:100%; }
+
+  input[type="checkbox"], input[type="radio"]{
+    width:15px;height:15px;
+    accent-color:var(--accent);
+    cursor:pointer;
+    margin:0;
+    flex:0 0 auto;
+  }
+
+  .nonecr-row{margin:6px 0;}
+
+  .declaration{margin-top:14px;}
+  .declaration p{ text-align:justify; }
+
+  /* Declaration sign block: right-aligned label in left half, input in right half */
+  .sign-block{margin-top:14px;}
+  .sign-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:end;
+    column-gap:14px;
+    margin:12px 0;
+  }
+  .sign-row label{ text-align:right; }
+  .sign-row .grow{ width:100%; }
+
+  .divider{ border:none; border-top:1px dashed #777; margin:18px 0 10px; }
+  .office{font-weight:bold;text-align:center;margin:4px 0;}
+  .office-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .office-row .yn{display:inline-flex;align-items:center;gap:14px;}
+  .office-row .yn label{display:inline-flex;align-items:center;gap:6px;margin:0;cursor:pointer;}
+
+  .helptip{ font-size:11.5px; color:var(--soft); font-style:italic; }
+  /* Italics render poorly in Devanagari, so neutralize them in Hindi */
+  body.lang-hi .note,
+  body.lang-hi .helptip,
+  body.lang-hi em.plain,
+  body.lang-hi .strong-italic{ font-style:normal; }
+
+  /* ---------- PRINT ---------- */
+  @media print{
+    body{background:#fff;font-size:11.5px;}
+    .toolbar{display:none;}
+    .page{ box-shadow:none; margin:0; width:auto; padding:10mm 12mm; }
+    input[type="text"]{ background:transparent; }
+    input[type="text"]:focus{ background:transparent; }
+    thead th{ background:#efece2 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    table, tr, td, th{ page-break-inside:avoid; }
+    .declaration, .sign-block, .office-section{ page-break-inside:avoid; }
+  }
+
+  /* @media (max-width:760px){
+    .page{padding:10mm 6mm;}
+    .col-sel{width:84px;}
+    .sign-row{grid-template-columns:1fr;align-items:start;}
+    .sign-row label{text-align:left;}
+  } */
+</style>
+</head>
+<body class="lang-en">
+
+<div class="toolbar">
+  <div class="tb-left">
+    <strong data-i18n="tb_title">Undertaking for Tatkaal Scheme</strong>
+    <span class="hint" data-i18n="tb_hint">— Fill in the fields, then print or save as PDF.</span>
+  </div>
+  <div class="tb-right">
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button id="btnEn" class="active" onclick="setLang('en')">English</button>
+      <button id="btnHi" onclick="setLang('hi')">हिन्दी</button>
+    </div>
+    <button class="act ghost" data-i18n="tb_clear" onclick="clearForm()">Clear</button>
+    <button class="act" data-i18n="tb_print" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+</div>
+
+<form id="tatkaalForm">
+<div class="page">
+
+  <h1 data-i18n="h1">Undertaking for Tatkaal Scheme</h1>
+
+  <p class="applied-as">
+    <span data-i18n="applied_prefix">(Please select) Passport applied as:</span>
+    <label><input type="radio" name="applied_as" value="Fresh"> <span data-i18n="opt_fresh">Fresh</span></label>
+    <span data-i18n="applied_or"> or </span>
+    <label><input type="radio" name="applied_as" value="Re-issue"> <span data-i18n="opt_reissue">Re-issue</span></label>
+    <span data-i18n="applied_suffix"></span>
+  </p>
+
+  <div class="intro">
+    <p data-i18n="intro_lead">Applicants applying under Tatkaal scheme should fill in the following undertaking:</p>
+    <ul>
+      <li data-i18n-html="bullet1">Applicants are required to furnish <strong>original documents</strong> along with one set of self-attested photocopies of the same at the Passport Seva Kendra (PSK) for processing.</li>
+      <li data-i18n-html="bullet2"><strong>Applicants over the age of 18 years</strong> have to submit any <strong>three of the documents</strong> specified in the below-mentioned List of Acceptable Documents, plus <strong>address and non-ECR proofs</strong> as applicable.</li>
+      <li data-i18n-html="bullet3"><strong>Applicants below the age of 18 years</strong> have to submit any <strong>two of the documents</strong> from Serial numbers 1 to 6 specified in the below-mentioned List of Acceptable Documents, plus <strong>address and non-ECR proofs</strong> as applicable.</li>
+    </ul>
+  </div>
+
+  <p class="section-head">
+    <span data-i18n="secA_label">A. List of Acceptable Documents:</span>
+    <span class="note" data-i18n="secA_note">Please select only 3 documents in case of applicants over the age of 18 years and 2 documents in case of applicants below the age of 18 years. Please ensure that the details mentioned (such as complete name, Date of Birth, Father&rsquo;s name etc) are the same in all the documents. However, address is not mandatorily required to be same in all the documents submitted by the applicants, but at least one of these documents should match the address filled in the application form.</span>
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="col-sr" data-i18n="th_sr">Sr. No.</th>
+        <th data-i18n="th_doc">Documents</th>
+        <th class="col-sel" data-i18n="th_sel">Selected by applicant/parent</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sr">1.</td>
+        <td data-i18n-html="doc1">PVC Aadhaar Card / Complete Original Aadhaar Letter / e-Aadhaar Card with digital signature verified mark issued by UIDAI or *Aadhaar Card <span class="strong-italic">(Small cut-out Aadhaar card / smart card printed by non-UIDAI entities will not be accepted.)</span></td>
+        <td class="col-sel"><input type="checkbox" name="doc1"></td>
+      </tr>
+      <tr><td class="col-sr">2.</td><td data-i18n="doc2">*Permanent Account Number (PAN)</td><td class="col-sel"><input type="checkbox" name="doc2"></td></tr>
+      <tr><td class="col-sr">3.</td><td data-i18n="doc3">Student Photo Identity Cards issued by Recognized Educational Institutions</td><td class="col-sel"><input type="checkbox" name="doc3"></td></tr>
+      <tr><td class="col-sr">4.</td><td data-i18n="doc4">Birth Certificates issued under the Registration of Births and Deaths Act, 1969 (18 of 1969)</td><td class="col-sel"><input type="checkbox" name="doc4"></td></tr>
+      <tr><td class="col-sr">5.</td><td data-i18n="doc5">Ration Card (latest or updated)</td><td class="col-sel"><input type="checkbox" name="doc5"></td></tr>
+      <tr><td class="col-sr">6.</td><td data-i18n="doc6">Last Passport issued (in case of re-issue only)</td><td class="col-sel"><input type="checkbox" name="doc6"></td></tr>
+      <tr><td class="col-sr">7.</td><td data-i18n="doc7">*Electors Photo Identity Card (EPIC)</td><td class="col-sel"><input type="checkbox" name="doc7"></td></tr>
+      <tr><td class="col-sr">8.</td><td data-i18n="doc8">*Driving Licenses (valid and within the jurisdiction of the State of submission of applicant)</td><td class="col-sel"><input type="checkbox" name="doc8"></td></tr>
+      <tr><td class="col-sr">9.</td><td data-i18n="doc9">Bank Passbook or Kisan Passbook or Post Office Passbook (with applicant&rsquo;s photo attested and with the latest transaction updated)</td><td class="col-sel"><input type="checkbox" name="doc9"></td></tr>
+      <tr><td class="col-sr">10.</td><td data-i18n="doc10">Scheduled Caste or Scheduled Tribe or Other backward class Certificate</td><td class="col-sel"><input type="checkbox" name="doc10"></td></tr>
+      <tr><td class="col-sr">11.</td><td data-i18n="doc11">Arms License issued under the Arms Act, 1959 (54 of 1959)</td><td class="col-sel"><input type="checkbox" name="doc11"></td></tr>
+      <tr><td class="col-sr">12.</td><td data-i18n="doc12">Pension Documents such as ex-servicemen's Pension book or Pension payment order issued to retired government employees, ex-servicemen's Widow or Dependent Certificates, Old Age Pension Order</td><td class="col-sel"><input type="checkbox" name="doc12"></td></tr>
+      <tr><td class="col-sr">13.</td><td data-i18n="doc13">Service Photo Identity Card issued by State / Central Government, Public Sector Undertakings, local bodies, or Public Limited Companies</td><td class="col-sel"><input type="checkbox" name="doc13"></td></tr>
+    </tbody>
+  </table>
+  <p class="helptip" data-i18n="digilocker_note">(*e-versions of the documents shall be accepted if the same are shared / uploaded through DigiLocker at the time of online application submission.)</p>
+
+  <p class="section-head">
+    <span data-i18n="secB_label">B. Address Proof:</span>
+    <span style="font-weight:normal;" data-i18n="secB_desc"> Please specify the present address proof document being submitted. In case of adults, address proof should be in the name of the applicant, except in starred (*) cases.</span>
+  </p>
+
+  <table class="addr-table">
+    <tbody>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_aadhaar"><span class="txt" data-i18n="addr_aadhaar">Aadhaar Card (as mentioned in the above List)</span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_rent"><span class="txt" data-i18n="addr_rent">Rent Agreement</span></label></td>
+      </tr>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_parent_passport"><span class="txt" data-i18n="addr_parent">*Parent's passport, in case of minors (First and last pages)</span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_electricity"><span class="txt" data-i18n="addr_electricity">**Electricity bill</span></label></td>
+      </tr>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_telephone"><span class="txt" data-i18n="addr_telephone">**Telephone (landline or post-paid mobile bill)</span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_water"><span class="txt" data-i18n="addr_water">**Water Bill</span></label></td>
+      </tr>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_gas"><span class="txt" data-i18n="addr_gas">Proof of Gas Connection</span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_itax"><span class="txt" data-i18n="addr_itax">Income Tax Assessment Order</span></label></td>
+      </tr>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_employer"><span class="txt" data-i18n-html="addr_employer">Certificate from Employer of reputed companies on letter head <em class="plain">(Only public limited companies can give address proof on company letter head along with seal. Computerised print-outs shall not be entertained.)</em></span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_epic"><span class="txt" data-i18n="addr_epic">Electors Photo Identity Card (EPIC) (as mentioned in the above List)</span></label></td>
+      </tr>
+      <tr>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_spouse_passport"><span class="txt" data-i18n="addr_spouse">*Spouse's passport copy (First and last page including family details mentioning applicant's name as spouse of the passport holder), (provided the applicant's present address matches the address mentioned in the spouse's passport)</span></label></td>
+        <td><label class="addr-cell"><input type="checkbox" name="addr_photo_passbook"><span class="txt" data-i18n="addr_photobank">Photo Passbook of running Bank Account and latest transactions updated (Scheduled Public Sector Banks, Scheduled Private Sector Indian Banks and Regional Rural Banks only)</span></label></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="helptip" data-i18n="online_note">In case of the online documents (**), the applicants may be asked to show source (Ex. email / official app on the mobile phone).</p>
+
+  <p class="section-head" data-i18n="secC_label">C. Non-ECR Document Name:</p>
+  <p class="nonecr-row">
+    <input type="text" class="fill-line" name="nonecr_doc" aria-label="Non-ECR Document Name">
+  </p>
+  <p class="helptip" data-i18n="nonecr_note">(In case of applicants between age of 15 to 50 years applying for the first time a full validity passport under non-ECR category, please specify the supporting original document such as certificate or marksheet of 10th or 12th class from recognised boards or graduation / post-graduation degree from recognised Universities etc. The complete list of documents required for ECNR can be seen at: https://www.passportindia.gov.in/psp/onlineHtml/NonEcrDocuments)</p>
+
+  <div class="declaration">
+    <p class="section-head" data-i18n="decl_head">Declaration by the applicant:</p>
+    <p data-i18n="decl_body">I understand and agree that I have applied under the Tatkaal scheme, and my application may be put on hold in case of documentary insufficiency. In such a case, I agree to submit the required number of documents at a later date given by the Office. I also state that I do not belong to the ineligible categories. I agree that if I am found to be belonging to the ineligible categories at a later stage, my application may be processed as per the guidelines for the said category. I agree that the decision of GO / APO / RPO shall be considered final.</p>
+  </div>
+
+  <div class="sign-block">
+    <div class="sign-row">
+      <label data-i18n="sign_signed">Signed by applicant or parent (in minor&rsquo;s case):</label>
+      <input type="text" class="grow" name="signature" aria-label="Signature">
+    </div>
+    <div class="sign-row">
+      <label data-i18n="sign_name">Applicant&rsquo;s Name:</label>
+      <input type="text" class="grow" name="applicant_name" aria-label="Applicant's Name">
+    </div>
+    <div class="sign-row">
+      <label data-i18n="sign_arn">ARN:</label>
+      <input type="text" class="grow" name="arn" aria-label="ARN">
+    </div>
+    <div class="sign-row">
+      <label data-i18n="sign_oldpass">Old Passport No. (in case of re-issue only):</label>
+      <input type="text" class="grow" name="old_passport" aria-label="Old Passport Number">
+    </div>
+  </div>
+
+  <div class="office-section">
+    <hr class="divider">
+    <p class="office" data-i18n="office_head">To be checked by the Office</p>
+    <div class="office-row">
+      <span data-i18n="office_pv_label">Previous Police Verification Report (PVR) status adverse?</span>
+      <span class="yn">
+        <label><input type="radio" name="pv_status" value="Yes"> <span data-i18n="yn_yes">Yes</span></label>
+        <label><input type="radio" name="pv_status" value="No"> <span data-i18n="yn_no">No</span></label>
+      </span>
+    </div>
+  </div>
+
+</div>
+</form>
+
+<script>
+  const I18N = {
+    en: {
+      tb_title:"Undertaking for Tatkaal Scheme",
+      tb_hint:"— Fill in the fields, then print or save as PDF.",
+      tb_clear:"Clear",
+      tb_print:"Print / Save as PDF",
+      h1:"Undertaking for Tatkaal Scheme",
+      applied_prefix:"(Please select) Passport applied as:",
+      opt_fresh:"Fresh",
+      applied_or:" or ",
+      opt_reissue:"Re-issue",
+      applied_suffix:"",
+      intro_lead:"Applicants applying under Tatkaal scheme should fill in the following undertaking:",
+      bullet1:"Applicants are required to furnish <strong>original documents</strong> along with one set of self-attested photocopies of the same at the Passport Seva Kendra (PSK) for processing.",
+      bullet2:"<strong>Applicants over the age of 18 years</strong> have to submit any <strong>three of the documents</strong> specified in the below-mentioned List of Acceptable Documents, plus <strong>address and non-ECR proofs</strong> as applicable.",
+      bullet3:"<strong>Applicants below the age of 18 years</strong> have to submit any <strong>two of the documents</strong> from Serial numbers 1 to 6 specified in the below-mentioned List of Acceptable Documents, plus <strong>address and non-ECR proofs</strong> as applicable.",
+      secA_label:"A. List of Acceptable Documents:",
+      secA_note:"Please select only 3 documents in case of applicants over the age of 18 years and 2 documents in case of applicants below the age of 18 years. Please ensure that the details mentioned (such as complete name, Date of Birth, Father\u2019s name etc) are the same in all the documents. However, address is not mandatorily required to be same in all the documents submitted by the applicants, but at least one of these documents should match the address filled in the application form.",
+      th_sr:"Sr. No.",
+      th_doc:"Documents",
+      th_sel:"Selected by applicant/parent",
+      doc1:"PVC Aadhaar Card / Complete Original Aadhaar Letter / e-Aadhaar Card with digital signature verified mark issued by UIDAI or *Aadhaar Card <span class=\"strong-italic\">(Small cut-out Aadhaar card / smart card printed by non-UIDAI entities will not be accepted.)</span>",
+      doc2:"*Permanent Account Number (PAN)",
+      doc3:"Student Photo Identity Cards issued by Recognized Educational Institutions",
+      doc4:"Birth Certificates issued under the Registration of Births and Deaths Act, 1969 (18 of 1969)",
+      doc5:"Ration Card (latest or updated)",
+      doc6:"Last Passport issued (in case of re-issue only)",
+      doc7:"*Electors Photo Identity Card (EPIC)",
+      doc8:"*Driving Licenses (valid and within the jurisdiction of the State of submission of applicant)",
+      doc9:"Bank Passbook or Kisan Passbook or Post Office Passbook (with applicant\u2019s photo attested and with the latest transaction updated)",
+      doc10:"Scheduled Caste or Scheduled Tribe or Other backward class Certificate",
+      doc11:"Arms License issued under the Arms Act, 1959 (54 of 1959)",
+      doc12:"Pension Documents such as ex-servicemen's Pension book or Pension payment order issued to retired government employees, ex-servicemen's Widow or Dependent Certificates, Old Age Pension Order",
+      doc13:"Service Photo Identity Card issued by State / Central Government, Public Sector Undertakings, local bodies, or Public Limited Companies",
+      digilocker_note:"(*e-versions of the documents shall be accepted if the same are shared / uploaded through DigiLocker at the time of online application submission.)",
+      secB_label:"B. Address Proof:",
+      secB_desc:" Please specify the present address proof document being submitted. In case of adults, address proof should be in the name of the applicant, except in starred (*) cases.",
+      addr_aadhaar:"Aadhaar Card (as mentioned in the above List)",
+      addr_rent:"Rent Agreement",
+      addr_parent:"*Parent's passport, in case of minors (First and last pages)",
+      addr_electricity:"**Electricity bill",
+      addr_telephone:"**Telephone (landline or post-paid mobile bill)",
+      addr_water:"**Water Bill",
+      addr_gas:"Proof of Gas Connection",
+      addr_itax:"Income Tax Assessment Order",
+      addr_employer:"Certificate from Employer of reputed companies on letter head <em class=\"plain\">(Only public limited companies can give address proof on company letter head along with seal. Computerised print-outs shall not be entertained.)</em>",
+      addr_epic:"Electors Photo Identity Card (EPIC) (as mentioned in the above List)",
+      addr_spouse:"*Spouse's passport copy (First and last page including family details mentioning applicant's name as spouse of the passport holder), (provided the applicant's present address matches the address mentioned in the spouse's passport)",
+      addr_photobank:"Photo Passbook of running Bank Account and latest transactions updated (Scheduled Public Sector Banks, Scheduled Private Sector Indian Banks and Regional Rural Banks only)",
+      online_note:"In case of the online documents (**), the applicants may be asked to show source (Ex. email / official app on the mobile phone).",
+      secC_label:"C. Non-ECR Document Name:",
+      nonecr_note:"(In case of applicants between age of 15 to 50 years applying for the first time a full validity passport under non-ECR category, please specify the supporting original document such as certificate or marksheet of 10th or 12th class from recognised boards or graduation / post-graduation degree from recognised Universities etc. The complete list of documents required for ECNR can be seen at: https://www.passportindia.gov.in/psp/onlineHtml/NonEcrDocuments)",
+      decl_head:"Declaration by the applicant:",
+      decl_body:"I understand and agree that I have applied under the Tatkaal scheme, and my application may be put on hold in case of documentary insufficiency. In such a case, I agree to submit the required number of documents at a later date given by the Office. I also state that I do not belong to the ineligible categories. I agree that if I am found to be belonging to the ineligible categories at a later stage, my application may be processed as per the guidelines for the said category. I agree that the decision of GO / APO / RPO shall be considered final.",
+      sign_signed:"Signed by applicant or parent (in minor\u2019s case):",
+      sign_name:"Applicant\u2019s Name:",
+      sign_arn:"ARN:",
+      sign_oldpass:"Old Passport No. (in case of re-issue only):",
+      office_head:"To be checked by the Office",
+      office_pv_label:"Previous Police Verification Report (PVR) status adverse?",
+      yn_yes:"Yes",
+      yn_no:"No"
+    },
+    hi: {
+      tb_title:"तत्काल योजना के लिए वचन (अंडरटेकिंग)",
+      tb_hint:"— फ़ील्ड भरें, फिर प्रिंट करें या पीडीएफ के रूप में सहेजें।",
+      tb_clear:"साफ़ करें",
+      tb_print:"प्रिंट करें / पीडीएफ सहेजें",
+      h1:"तत्काल योजना के लिए वचन (अंडरटेकिंग)",
+      applied_prefix:"(कृपया चुनें) पासपोर्ट के लिए आवेदन:",
+      opt_fresh:"नया",
+      applied_or:" अथवा ",
+      opt_reissue:"पुनःजारी करने",
+      applied_suffix:" के लिए आवेदन करना है",
+      intro_lead:"तत्काल योजना के तहत आवेदन करने वाले आवेदकों को निम्नलिखित वचन (अंडरटेकिंग) भरकर जमा करना आवश्यक है:",
+      bullet1:"आवेदकों को पासपोर्ट सेवा केंद्र (पीएसके) में प्रसंस्करण के लिए स्व-सत्यापित फोटोकॉपी की एक सेट के साथ <strong>मूल दस्तावेज</strong> प्रस्तुत करना आवश्यक है।",
+      bullet2:"<strong>18 वर्ष से अधिक आयु के आवेदकों</strong> को स्वीकार्य दस्तावेजों की नीचे दी गई सूची में निर्दिष्ट <strong>किन्हीं भी तीन दस्तावेजों</strong> को जमा करना होगा, साथ ही <strong>पता और गैर-ईसीआर प्रमाण</strong> (दस्तावेज़) जो भी लागू हो जमा करना होगा।",
+      bullet3:"<strong>18 वर्ष से कम आयु के आवेदकों</strong> को स्वीकार्य दस्तावेजों की नीचे दी गई सूची में से निर्दिष्ट <strong>क्रम संख्या 1 से 6 में से किन्हीं दो दस्तावेजों</strong> को जमा करना होगा, साथ ही <strong>पता और गैर-ईसीआर प्रमाण</strong> (दस्तावेज़) जो भी लागू हो जमा करना होगा।",
+      secA_label:"क. स्वीकार्य दस्तावेजों की सूची:",
+      secA_note:"कृपया सुनिश्चित करें कि उल्लिखित विवरण (जैसे पूरा नाम, जन्म तिथि, पिता का नाम आदि) सभी दस्तावेजों में समान हैं। हालांकि, आवेदकों द्वारा प्रस्तुत सभी दस्तावेजों में पता समान होना अनिवार्य नहीं है, लेकिन इनमें से कम से कम एक दस्तावेज आवेदन में भरे गए पते से मेल खाना चाहिए।",
+      th_sr:"क्रमांक",
+      th_doc:"दस्तावेज़",
+      th_sel:"आवेदक/माता या पिता (नाबालिग के मामले में) द्वारा अंकित (टिक) किया गया",
+      doc1:"यूआईडीएआई द्वारा जारी किया गया - पीवीसी आधार कार्ड / पूर्ण मूल आधार कार्ड / ई-आधार कार्ड डिजिटल हस्ताक्षर सत्यापित चिह्न के साथ अथवा *आधार कार्ड <span class=\"strong-italic\">(काटकर निकले हुए छोटे आधार कार्ड / गैर-यूआईडीएआई संस्थाओं द्वारा मुद्रित स्मार्ट कार्ड स्वीकार नहीं किया जाएगा।)</span>",
+      doc2:"*स्थायी खाता संख्या (पैन)",
+      doc3:"मान्यता प्राप्त शैक्षणिक संस्थानों द्वारा जारी छात्र फोटो पहचान पत्र",
+      doc4:"जन्म और मृत्यु पंजीकरण अधिनियम, 1969 (1969 का 18) के तहत जारी जन्म प्रमाण पत्र",
+      doc5:"राशन कार्ड (नवीनतम या अद्यतन)",
+      doc6:"जारी किया गया पिछला पासपोर्ट (केवल पुनः जारी करने के मामले में)",
+      doc7:"*मतदाता फोटो पहचान पत्र (ईपीआईसी)",
+      doc8:"*ड्राइविंग लाइसेंस (वैध और आवेदक को प्रस्तुत करने के राज्य के अधिकार क्षेत्र के भीतर)",
+      doc9:"बैंक पासबुक या किसान पासबुक या पोस्ट ऑफिस पासबुक (आवेदक के फोटो के साथ सत्यापित और नवीनतम लेन-देन अद्यतन के साथ)",
+      doc10:"अनुसूचित जाति या अनुसूचित जनजाति या अन्य पिछड़ा वर्ग प्रमाण पत्र",
+      doc11:"शस्त्र अधिनियम, 1959 (1959 का 54) के तहत जारी शस्त्र लाइसेंस",
+      doc12:"पेंशन दस्तावेज जैसे सेवानिवृत्त सैनिकों की पेंशन बुक या सेवानिवृत्त सरकारी कर्मचारियों को जारी किया गया पेंशन भुगतान आदेश, सेवानिवृत्त सैनिकों की विधवा या आश्रित प्रमाण पत्र, वृद्धावस्था पेंशन आदेश",
+      doc13:"राज्य / केंद्र सरकार, सार्वजनिक क्षेत्र के उपक्रम, स्थानीय निकाय, या पब्लिक लिमिटेड कंपनियों द्वारा जारी सेवा फोटो पहचान पत्र",
+      digilocker_note:"(*दस्तावेजों के ई-संस्करण स्वीकार किए जाएंगे यदि वे ऑनलाइन आवेदन जमा करने के समय डिजिलॉकर के माध्यम से साझा / अपलोड किया गया है।)",
+      secB_label:"ख. पता प्रमाण:",
+      secB_desc:" कृपया प्रस्तुत किए जा रहे पते के प्रमाण का उल्लेख करें। वयस्कों के मामले में, पता प्रमाण तारांकित (*) मामलों को छोड़कर आवेदक के नाम पर होना चाहिए।",
+      addr_aadhaar:"आधार कार्ड (जैसा कि ऊपर दी गई सूची में बताया गया है)",
+      addr_rent:"किराया समझौता",
+      addr_parent:"*नाबालिगों के मामले में माता-पिता का पासपोर्ट (पहले और आखिरी पृष्ठ)",
+      addr_electricity:"**बिजली का बिल",
+      addr_telephone:"**टेलीफोन (लैंडलाइन या पोस्टपेड मोबाइल बिल)",
+      addr_water:"**पानी का बिल",
+      addr_gas:"गैस कनेक्शन का प्रमाण",
+      addr_itax:"आयकर निर्धारण आदेश",
+      addr_employer:"प्रतिष्ठित कंपनियों के नियोक्ता से उनकी कंपनी के पत्र-शीर्ष पर लिखे गए प्रमाण पत्र <em class=\"plain\">(केवल पब्लिक लिमिटेड कंपनियां उपरोक्त सूची में उल्लिखित पते का प्रमाण अपने मुहर के साथ दे सकती हैं। कंप्यूटर से निकाले गए प्रिंट आउट पर विचार नहीं किया जाएगा।)</em>",
+      addr_epic:"निर्वाचक फोटो पहचान पत्र (ईपीआईसी) (जैसा कि ऊपर दी गई सूची में बताया गया है)",
+      addr_spouse:"*जीवनसाथी की पासपोर्ट प्रति (पासपोर्ट के जीवनसाथी के रूप में आवेदक के नाम का उल्लेख करते हुए परिवार के विवरण सहित पहला और अंतिम पृष्ठ), (बशर्ते आवेदक का वर्तमान पता पति/पत्नी के पासपोर्ट में उल्लिखित पते से मेल खाता हो)",
+      addr_photobank:"नवीनतम लेन-देन के अद्यतन के साथ चल रहे बैंक खाते की फोटो पासबुक (केवल अनुसूचित सार्वजनिक क्षेत्र के बैंक, अनुसूचित निजी क्षेत्र के भारतीय बैंक और क्षेत्रीय ग्रामीण बैंक)",
+      online_note:"ऑनलाइन दस्तावेजों (**) के मामले में, आवेदकों से स्रोत (उदाहरण:- ईमेल / मोबाइल फोन पर आधिकारिक ऐप) दिखाने के लिए कहा जा सकता है।",
+      secC_label:"ग. गैर-ईसीआर दस्तावेज़ का नाम:",
+      nonecr_note:"(गैर-ईसीआर श्रेणी के तहत पहली बार पूर्ण वैधता वाले पासपोर्ट के लिए आवेदन करने वाले 15 से 50 वर्ष के बीच के आवेदकों के मामले में, कृपया सहायक मूल दस्तावेज जैसे मान्यता प्राप्त बोर्ड से कक्षा 10वीं और 12वीं प्रमाण पत्र या अंकपत्र अथवा मान्यता प्राप्त विश्वविद्यालय से स्नातक / स्नातकोत्तर की डिग्री आदि निर्दिष्ट करें। ईसीएनआर के लिए आवश्यक दस्तावेजों की पूरी सूची निम्नलिखित लिंक पर जाकर देखी जा सकती है: https://www.passportindia.gov.in/psp/onlineHtml/NonEcrDocuments)",
+      decl_head:"आवेदक द्वारा घोषणा:",
+      decl_body:"मैं समझता हूँ और सहमत हूँ कि मैंने तत्काल योजना के तहत आवेदन किया है और दस्तावेजों की अपर्याप्तता (कम/न) होने की स्थिति में मेरे आवेदन को रोका जा सकता है। ऐसे मामले में, मैं कार्यालय द्वारा दी गई बाद की तारीख में आवश्यक दस्तावेजों को जमा करने के लिए सहमत हूँ। मैं यह भी मानता हूँ कि मैं उपर्युक्त अपात्र श्रेणियों से संबंधित नहीं हूँ। मैं इससे सहमत हूँ कि अगर मुझे बाद में इन अपात्र श्रेणियों से संबंधित पाया जाता है, तो मेरे आवेदन को उक्त श्रेणी के दिशानिर्देशों के अनुसार संसाधित (प्रोसेस्ड) किया जा सकता है। मैं सहमत हूँ कि जीओ / एपीओ / आरपीओ का निर्णय अंतिम माना जाएगा।",
+      sign_signed:"आवेदक या माता-पिता (नाबालिग के मामले में) द्वारा हस्ताक्षरित:",
+      sign_name:"आवेदक का नाम:",
+      sign_arn:"एआरएन:",
+      sign_oldpass:"पुराना पासपोर्ट नंबर (केवल पुनः जारी करने के मामले में):",
+      office_head:"कार्यालय द्वारा जाँचा जाना है",
+      office_pv_label:"क्या पिछली पुलिस सत्यापन रिपोर्ट (पीवीआर) की स्थिति प्रतिकूल है?",
+      yn_yes:"हाँ",
+      yn_no:"नहीं"
+    }
+  };
+
+  function setLang(lang){
+    const dict = I18N[lang];
+    if(!dict) return;
+
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      const k = el.getAttribute('data-i18n');
+      if(dict[k] !== undefined) el.textContent = dict[k];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el=>{
+      const k = el.getAttribute('data-i18n-html');
+      if(dict[k] !== undefined) el.innerHTML = dict[k];
+    });
+
+    document.body.classList.toggle('lang-hi', lang === 'hi');
+    document.body.classList.toggle('lang-en', lang === 'en');
+    document.documentElement.lang = lang;
+    document.title = dict.tb_title;
+
+    document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+    document.getElementById('btnHi').classList.toggle('active', lang === 'hi');
+  }
+
+  function clearForm(){
+    const msg = (document.documentElement.lang === 'hi')
+      ? 'फ़ॉर्म के सभी फ़ील्ड साफ़ करें?'
+      : 'Clear all fields on the form?';
+    if(confirm(msg)){
+      document.getElementById('tatkaalForm').reset();
+    }
+  }
+</script>
+
+</body>
+</html>
